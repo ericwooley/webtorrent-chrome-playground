@@ -1,0 +1,22 @@
+{
+  "name": "App name here",
+  "description": "Boilerplate template for Chrome apps with ES6 and all the trimmings",
+  "version": "1",
+  "manifest_version": 2,
+  "icons": {
+    "16": "img/icon.png",
+    "128": "img/icon.png"
+  },
+  "app": {
+    "background": {
+      "scripts": ["js/background.js"],
+      "persistent": true
+    }
+  },
+  "permissions": [
+    "http://localhost:35729/",
+    "storage",
+    "unlimitedStorage",
+    {"fileSystem": ["write"]}
+  ]
+}
