@@ -18,44 +18,47 @@ function writeFile(torrentFile, fileWriter) {
     if (err) {
       throw err;
     }
+    /*
     const blob = new Blob([buffer], {type: mimeType(torrentFile.name)} );
     fileWriter.write(blob);
     console.log('wrote file');
-    // function writeChunk(chunk) {
-    //   const blob = new Blob([chunk], {type: mimeType(torrentFile.name)} );
-    //   if (fileWriter.length > 0) {
-    //     fileWriter.seek(fileWriter.length);
-    //   }
-    //   fileWriter.write(blob);
-    //   console.log('wrote chunk');
-    // }
-    // let chunkIndex = 0;
-    // function getNextChunk() {
-    //   const chunkStart = chunkIndex * chunkSize;
-    //   if (chunkStart > buffer.length) {
-    //     return null;
-    //   }
-    //   const chunkEnd = Math.min((chunkIndex + 1) * chunkSize, buffer.length);
-    //   const chunk = buffer.slice(chunkStart, chunkEnd);
-    //   chunkIndex += 1;
-    //   return chunk;
-    // }
-    // writeChunk(getNextChunk());
-    // // fileWriter.onprogress = (event) => {
-    // //   const loadPercent = event.loaded / event.total * 100.0;
-    // //   console.log('progress', loadPercent);
-    // //   if (loadPercent === 100) {
-    // //
-    // //   }
-    // // };
-    // fileWriter.onwriteend = () => {
-    //   console.log('Write completed.');
-    //   const nextChunk = getNextChunk();
-    //   if (nextChunk) {
-    //     console.log('writing next chunk');
-    //     setTimeout(() => writeChunk(nextChunk), 10);
-    //   }
-    // };
+    /*/
+
+    let chunkIndex = 0;
+    const blobMeta = {type: mimeType(torrentFile.name)};
+    function writeChunk(chunk, preventSeek = false) {
+      const blob = {blob: new Blob([chunk], blobMeta)};
+      if (!preventSeek) {
+        fileWriter.seek(0);
+      }
+      setTimeout(() => {
+        fileWriter.write(blob.blob);
+        delete blob.blob;
+      }, 20);
+    }
+
+    function getNextChunk() {
+      const chunkStart = chunkIndex * chunkSize;
+      if (chunkStart > buffer.length) {
+        return null;
+      }
+      const chunkEnd = Math.min(((chunkIndex + 1) * chunkSize), buffer.length);
+      console.log('chuck:', chunkStart, chunkEnd, '/', buffer.length);
+      return buffer.slice(chunkStart, chunkEnd);
+    }
+    writeChunk(getNextChunk(), true);
+    chunkIndex += 1;
+    fileWriter.onwriteend = () => {
+      // console.log('Write completed.');
+      const nextChunk = getNextChunk();
+      if (nextChunk) {
+        writeChunk(nextChunk);
+        chunkIndex += 1;
+      } else {
+        console.log('completed write');
+      }
+    };
+    //*/
   });
 
 
