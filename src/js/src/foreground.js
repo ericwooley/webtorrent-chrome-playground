@@ -1,31 +1,61 @@
 /* globals chrome */
 import dragDrop from 'drag-drop/buffer';
+import mimeType from './mime';
 
+
+const chunkSize = 1024 * 1024 * 5; // 5 megabyte chunks
 const $$ = {
   saveButton: document.querySelector('.save-button')
 };
 
-function writeFile(torrentFile, fileWriter, index = 0) {
-  fileWriter.onwriteend = () => {
-    console.log('Write completed.');
-  };
+function writeFile(torrentFile, fileWriter) {
+
   fileWriter.onerror = (e) => {
-    console.log('Write failed: ' + e.toString());
-  };
-  fileWriter.onprogress = (event) => {
-    const loadPercent = event.loaded / event.total * 100.0;
-    console.log('progress', loadPercent);
+    console.log('Write failed: ' + e);
   };
 
-  const buffer = torrentFile.getBuffer((err, buffer) => {
-    if(err) {
+  torrentFile.getBuffer((err, buffer) => {
+    if (err) {
       throw err;
     }
-    console.log('writing buffer', torrentFile, buffer);
-    // const blob = new Blob(buffer, {type: torrentFile.type});
-    const blob = new Blob(buffer.toArrayBuffer(), {type: 'image/png'} );
+    const blob = new Blob([buffer], {type: mimeType(torrentFile.name)} );
     fileWriter.write(blob);
-    console.log('wrote to disk');
+    console.log('wrote file');
+    // function writeChunk(chunk) {
+    //   const blob = new Blob([chunk], {type: mimeType(torrentFile.name)} );
+    //   if (fileWriter.length > 0) {
+    //     fileWriter.seek(fileWriter.length);
+    //   }
+    //   fileWriter.write(blob);
+    //   console.log('wrote chunk');
+    // }
+    // let chunkIndex = 0;
+    // function getNextChunk() {
+    //   const chunkStart = chunkIndex * chunkSize;
+    //   if (chunkStart > buffer.length) {
+    //     return null;
+    //   }
+    //   const chunkEnd = Math.min((chunkIndex + 1) * chunkSize, buffer.length);
+    //   const chunk = buffer.slice(chunkStart, chunkEnd);
+    //   chunkIndex += 1;
+    //   return chunk;
+    // }
+    // writeChunk(getNextChunk());
+    // // fileWriter.onprogress = (event) => {
+    // //   const loadPercent = event.loaded / event.total * 100.0;
+    // //   console.log('progress', loadPercent);
+    // //   if (loadPercent === 100) {
+    // //
+    // //   }
+    // // };
+    // fileWriter.onwriteend = () => {
+    //   console.log('Write completed.');
+    //   const nextChunk = getNextChunk();
+    //   if (nextChunk) {
+    //     console.log('writing next chunk');
+    //     setTimeout(() => writeChunk(nextChunk), 10);
+    //   }
+    // };
   });
 
 
